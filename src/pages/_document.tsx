@@ -4,7 +4,7 @@ import { Html, Head, Main, NextScript } from 'next/document';
 export default function Document() {
   return (
     <Html lang='en'>
-      <Head title='Ignite Shop'>
+      <Head>
         <link rel='preconnect' href='https://fonts.googleapis.com' />
         <link
           rel='preconnect'

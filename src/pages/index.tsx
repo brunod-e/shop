@@ -1,9 +1,11 @@
 import { GetStaticProps } from 'next';
-import { HomeContainer, Product } from '@/styles/pages/home';
-import { useKeenSlider } from 'keen-slider/react';
+import Head from 'next/head';
 import Image from 'next/image';
-import { stripe } from '../lib/stripe';
+import Link from 'next/link';
+import { useKeenSlider } from 'keen-slider/react';
 import Stripe from 'stripe';
+import { stripe } from '../lib/stripe';
+import { HomeContainer, Product } from '@/styles/pages/home';
 
 import 'keen-slider/keen-slider.min.css';
 
@@ -12,7 +14,7 @@ interface HomeProps {
     id: string;
     name: string;
     imageUrl: string;
-    price: number;
+    price: string;
   }[];
 }
 
@@ -22,17 +24,28 @@ const Home = ({ products }: HomeProps) => {
   });
 
   return (
-    <HomeContainer ref={sliderRef} className='keen-slider'>
-      {products.map((product) => (
-        <Product key={product.id} className='keen-slider__slide'>
-          <Image src={product.imageUrl} width={520} height={480} alt='' />
-          <footer>
-            <strong>{product.name}</strong>
-            <span>{product.price}</span>
-          </footer>
-        </Product>
-      ))}
-    </HomeContainer>
+    <>
+      <Head>
+        <title>Home | Ignite Shop</title>
+      </Head>
+      <HomeContainer ref={sliderRef} className='keen-slider'>
+        {products.map((product) => (
+          <Link
+            href={`product/${product.id}`}
+            key={product.id}
+            prefetch={false}
+          >
+            <Product className='keen-slider__slide'>
+              <Image src={product.imageUrl} width={520} height={480} alt='' />
+              <footer>
+                <strong>{product.name}</strong>
+                <span>{product.price}</span>
+              </footer>
+            </Product>
+          </Link>
+        ))}
+      </HomeContainer>
+    </>
   );
 };
 
@@ -46,7 +59,7 @@ export const getStaticProps: GetStaticProps = async () => {
     const priceFormatted = new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format((price.unit_amount as number) / 100);
+    }).format(price.unit_amount / 100);
 
     return {
       id: product.id,
