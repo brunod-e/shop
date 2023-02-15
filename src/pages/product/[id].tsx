@@ -1,51 +1,30 @@
+import { ProductType } from '@/context/CartContext';
+import { useCart } from '@/hooks/useCart';
 import { stripe } from '@/lib/stripe';
 import {
   ImageContainer,
   ProductContainer,
   ProductDetails,
 } from '@/styles/pages/product';
-import axios from 'axios';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useRouter } from 'next/router';
 import Stripe from 'stripe';
 
 interface ProductProps {
-  product: {
-    id: string;
-    name: string;
-    imageUrl: string;
-    price: string;
-    description: string;
-    defaultPriceId: string;
-  };
+  product: ProductType;
 }
 
 const Product = ({ product }: ProductProps) => {
-  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
-    useState(false);
-  // const { isFallback } = useRouter();
+  const { isFallback } = useRouter();
 
-  // if (isFallback) {
-  //   return <p>Carregando...</p>;
-  // }
+  const { checkIfProductExists, addToCart } = useCart();
 
-  const handleBuyProduct = async () => {
-    try {
-      setIsCreatingCheckoutSession(true);
-      const response = await axios.post('/api/checkout', {
-        priceId: product.defaultPriceId,
-      });
+  const itemExists = checkIfProductExists(product.id);
 
-      const { checkoutUrl } = response.data;
-
-      window.location.href = checkoutUrl;
-    } catch (error) {
-      setIsCreatingCheckoutSession(false);
-      // Conectar com o Sentry/DataDog
-      alert(error.message);
-    }
+  const handleBuyProduct = () => {
+    addToCart(product);
   };
 
   return (
@@ -64,11 +43,10 @@ const Product = ({ product }: ProductProps) => {
 
           <p>{product.description}</p>
 
-          <button
-            disabled={isCreatingCheckoutSession}
-            onClick={handleBuyProduct}
-          >
-            Comprar agora
+          <button disabled={itemExists} onClick={handleBuyProduct}>
+            {itemExists
+              ? 'Este produto já está no seu carrinho!'
+              : 'Colocar no carrinho'}
           </button>
         </ProductDetails>
       </ProductContainer>
@@ -77,7 +55,6 @@ const Product = ({ product }: ProductProps) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // RECOMENDADO PARA BUSCAR PELOS 10 MAIS ACESSADOS POR EXEMPLO
   return {
     paths: [{ params: { id: 'prod_NLTe6PFZ5SXpJx' } }],
     fallback: true,
@@ -109,6 +86,7 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({
         price: priceFormatted,
         description: product.description,
         defaultPriceId: price.id,
+        numberPrice: price.unit_amount / 100,
       },
     },
     revalidate: 60 * 60 * 1, // 1 hour

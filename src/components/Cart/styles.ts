@@ -25,6 +25,14 @@ export const CartContent = styled(Dialog.Content, {
     fontSize: '$md',
     color: '$gray100',
   },
+
+  '> section': {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    gap: '1.5rem',
+    overflowY: 'auto',
+  },
 });
 export const CartClose = styled(Dialog.Close, {
   background: 'none',
