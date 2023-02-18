@@ -29,10 +29,6 @@ export const globalStyles = globalCss({
     fontWeight: 400,
   },
 
-  a: {
-    color: 'inherit',
-  },
-
   button: {
     cursor: 'pointer',
     border: 'none',
